@@ -11,4 +11,5 @@ env/
 .idea/
 .DS_Store
 Thumbs*.db
+instance/
 .db
