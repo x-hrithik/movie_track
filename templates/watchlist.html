@@ -23,67 +23,59 @@
 
     <h1>My Lists</h1>
 
-    <div class="section">
-        <h2>Watchlist</h2>
-        {% if watchlist %}
-            {% for movie in watchlist %}
-                <div class="movie">
-                    {% if movie.posterURL %}
-                        <img src="{{ movie.posterURL }}" alt="{{ movie.title }}">
-                    {% endif %}
-                    <div class="movie-info">
-                        <h3>{{ movie.title }}</h3>
-                        <form method="POST" action="{{ url_for('movies.removeMovie', movieId=movie.id) }}">
-                            <button type="submit" class="remove-btn">Remove</button>
-                        </form>
-                    </div>
-                </div>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="flash" style="color: green; text-align: center; margin-bottom: 10px;">{{ message }}</div>
             {% endfor %}
-        {% else %}
-            <p class="empty">No movies in watchlist.</p>
         {% endif %}
-    </div>
+    {% endwith %}
 
-    <div class="section">
-        <h2>Currently Watching</h2>
-        {% if watching %}
-            {% for movie in watching %}
-                <div class="movie">
-                    {% if movie.posterURL %}
-                        <img src="{{ movie.posterURL }}" alt="{{ movie.title }}">
-                    {% endif %}
-                    <div class="movie-info">
-                        <h3>{{ movie.title }}</h3>
-                        <form method="POST" action="{{ url_for('movies.removeMovie', movieId=movie.id) }}">
-                            <button type="submit" class="remove-btn">Remove</button>
-                        </form>
-                    </div>
-                </div>
-            {% endfor %}
-        {% else %}
-            <p class="empty">No movies currently watching.</p>
-        {% endif %}
-    </div>
+    <input type="text" id="movieSearch" placeholder="Search your movies..." style="width: 100%; padding: 10px; margin-bottom: 20px; box-sizing: border-box;">
 
-    <div class="section">
-        <h2>Watched</h2>
-        {% if watched %}
-            {% for movie in watched %}
-                <div class="movie">
+    <form method="POST" action="{{ url_for('lists.createList') }}" style="margin-bottom: 30px;">
+        <input type="text" name="name" placeholder="New list name" required>
+        <button type="submit">Create List</button>
+    </form>
+
+    {% for list in lists %}
+    <div class="section list-section">
+        <h2>{{ list.name }}</h2>
+        {% if list.movies %}
+            {% for movie in list.movies %}
+                <div class="movie" data-title="{{ movie.title | lower }}">
                     {% if movie.posterURL %}
                         <img src="{{ movie.posterURL }}" alt="{{ movie.title }}">
                     {% endif %}
                     <div class="movie-info">
                         <h3>{{ movie.title }}</h3>
                         <form method="POST" action="{{ url_for('movies.removeMovie', movieId=movie.id) }}">
+                            <input type="hidden" name="list_id" value="{{ list.id }}">
                             <button type="submit" class="remove-btn">Remove</button>
                         </form>
                     </div>
                 </div>
             {% endfor %}
         {% else %}
-            <p class="empty">No watched movies.</p>
+            <p class="empty">No movies in this list.</p>
         {% endif %}
     </div>
+    {% endfor %}
+
+    <script>
+        document.getElementById('movieSearch').addEventListener('input', function() {
+            var query = this.value.toLowerCase();
+            var movies = document.querySelectorAll('.movie[data-title]');
+            var sections = document.querySelectorAll('.list-section');
+            movies.forEach(function(movie) {
+                var title = movie.getAttribute('data-title');
+                movie.style.display = title.indexOf(query) !== -1 ? 'flex' : 'none';
+            });
+            sections.forEach(function(section) {
+                var visible = section.querySelectorAll('.movie[data-title]:not([style*="display: none"])').length;
+                section.style.display = visible > 0 || section.querySelector('.empty') ? 'block' : 'none';
+            });
+        });
+    </script>
 </body>
 </html>

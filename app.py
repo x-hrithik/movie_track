@@ -1,8 +1,9 @@
 from flask import Flask, render_template, request, session
 from search import searchMovie
-from dbstruct import db, user, movie
+from dbstruct import db, user, movie, movielist
 from auth import auth
 from watchlist import movies
+from lists import lists
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'dev-secret-key-change-in-production'
@@ -13,6 +14,7 @@ db.init_app(app)
 
 app.register_blueprint(auth)
 app.register_blueprint(movies)
+app.register_blueprint(lists)
 
 @app.route('/')
 def home():
@@ -25,7 +27,8 @@ def search():
         results = searchMovie(query)
     else:
         results = []
-    return render_template('search.html', query=query, results=results)
+    userLists = movielist.query.filter_by(userID=session.get('userID')).all() if 'userID' in session else []
+    return render_template('search.html', query=query, results=results, user_lists=userLists)
 
 if __name__ == '__main__':
     with app.app_context():

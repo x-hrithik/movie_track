@@ -16,8 +16,24 @@
 </head>
 <body>
     <div class="nav">
-        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('home') }}">Home</a> |
+        {% if session.get('username') %}
+            <a href="{{ url_for('movies.my_lists') }}">My Lists</a> |
+            Welcome, {{ session.get('username') }}! |
+            <a href="{{ url_for('auth.logout') }}">Logout</a>
+        {% else %}
+            <a href="{{ url_for('auth.login') }}">Login</a> |
+            <a href="{{ url_for('auth.signup') }}">Sign Up</a>
+        {% endif %}
     </div>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div style="color: green; text-align: center; margin-bottom: 10px;">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
 
     <div class="search-box">
         <form method="get" action="{{ url_for('search') }}">
@@ -38,27 +54,25 @@
                         <h3>{{ movie.title }}</h3>
                         <p>{{ movie.overview or 'No description available.' }}</p>
                         <p>Rating: {{ movie.vote_average or 'N/A' }}</p>
-                        <form method="POST" action="{{ url_for('movies.addMovie') }}" style="display: inline;">
-                            <input type="hidden" name="tmdb_id" value="{{ movie.id }}">
-                            <input type="hidden" name="title" value="{{ movie.title }}">
-                            <input type="hidden" name="poster" value="{{ movie.posterURL or '' }}">
-                            <input type="hidden" name="status" value="watchlist">
-                            <button type="submit">Watchlist</button>
-                        </form>
-                        <form method="POST" action="{{ url_for('movies.addMovie') }}" style="display: inline;">
-                            <input type="hidden" name="tmdb_id" value="{{ movie.id }}">
-                            <input type="hidden" name="title" value="{{ movie.title }}">
-                            <input type="hidden" name="poster" value="{{ movie.posterURL or '' }}">
-                            <input type="hidden" name="status" value="watching">
-                            <button type="submit">Watching</button>
-                        </form>
-                        <form method="POST" action="{{ url_for('movies.addMovie') }}" style="display: inline;">
-                            <input type="hidden" name="tmdb_id" value="{{ movie.id }}">
-                            <input type="hidden" name="title" value="{{ movie.title }}">
-                            <input type="hidden" name="poster" value="{{ movie.posterURL or '' }}">
-                            <input type="hidden" name="status" value="watched">
-                            <button type="submit">Watched</button>
-                        </form>
+                        {% if session.get('username') %}
+                            {% if user_lists %}
+                                <form method="POST" action="{{ url_for('movies.addMovie') }}" style="display: inline;">
+                                    <input type="hidden" name="tmdb_id" value="{{ movie.id }}">
+                                    <input type="hidden" name="title" value="{{ movie.title }}">
+                                    <input type="hidden" name="poster" value="{{ movie.posterURL or '' }}">
+                                    <select name="list_id" multiple style="vertical-align: middle; min-width: 120px; height: 60px;">
+                                        {% for list in user_lists %}
+                                            <option value="{{ list.id }}">{{ list.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="submit">Add</button>
+                                </form>
+                            {% else %}
+                                <a href="{{ url_for('movies.my_lists') }}">Create a list to add movies</a>
+                            {% endif %}
+                        {% else %}
+                            <a href="{{ url_for('auth.login') }}">Login to add movies</a>
+                        {% endif %}
                     </div>
                 </div>
             {% endfor %}
