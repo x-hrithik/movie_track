@@ -2,12 +2,12 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 
-from backend.search import searchMovie
-from backend.dbstruct import db, user, movie, movielist
-from backend.auth import auth
-from backend.watchlist import movies
-from backend.lists import lists
-from backend.clubs import clubs
+from search import searchMovie
+from dbstruct import db, user, movie, movielist
+from auth import auth
+from watchlist import movies
+from lists import lists
+from clubs import clubs
 
 app = Flask(__name__)
 app.config['JWT_SECRET_KEY'] = 'dev-secret-key-change-in-production'

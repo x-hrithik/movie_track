@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from backend.dbstruct import db, user, club, movielist
+from dbstruct import db, user, club, movielist
 
 clubs = Blueprint('clubs', __name__)
 
@@ -114,6 +114,26 @@ def create_club_list(club_id):
         'message': f'Created list: {list_name}',
         'list': new_list.to_dict()
     }), 201
+
+# delete user list IN club
+@clubs.route('/<int:club_id>/lists/<int:list_id>', methods=['DELETE'])
+@jwt_required()
+def delete_club_list(club_id, list_id):
+    user_id = int(get_jwt_identity())
+    current_user = user.query.get(user_id)
+    list_obj = movielist.query.get_or_404(list_id)
+    
+    # check if user is club member
+    club_obj = club.query.get_or_404(club_id)
+    if not club_obj.is_member(current_user):
+        return jsonify({'error': 'Not a member'}), 403
+    
+    if list_obj.club_id != club_id:
+        return jsonify({'error': 'List not in this club'}), 403
+    
+    db.session.delete(list_obj)
+    db.session.commit()
+    return jsonify({'message': 'List deleted'}), 200
 
 # delete clubs
 @clubs.route('/<int:club_id>', methods=['DELETE'])

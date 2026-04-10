@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from backend.dbstruct import db, user, movie, movielist
+from dbstruct import db, user, movie, movielist
 
 movies = Blueprint('movies', __name__)
 

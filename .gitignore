@@ -21,3 +21,29 @@ frontend/dist/
 frontend/.cache/
 frontend/package-lock.json
 frontend/*.local
+frontend/instance/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Coverage reports
+coverage/
+.nyc_output/
+
+# Build outputs
+build/
+dist/
+
+# TypeScript
+*.tsbuildinfo
+
+# Additional env files
+.env.local
+.env.*.local
+
+# Temporary files
+*.tmp
+*.temp

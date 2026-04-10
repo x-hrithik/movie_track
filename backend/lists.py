@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from backend.dbstruct import db, movielist, user
+from dbstruct import db, movielist, user
 
 lists = Blueprint('lists', __name__)
 
@@ -35,6 +35,19 @@ def create_list():
         'message': f'Created list: {list_name}',
         'list': new_list.to_dict()
     }), 201
+
+# delete user list
+@lists.route('/<int:list_id>', methods=['DELETE'])
+@jwt_required()
+def delete_list(list_id):
+    user_id = int(get_jwt_identity())
+    list_obj = movielist.query.get_or_404(list_id)
+
+    if list_obj.userID != user_id:
+        return jsonify({'error': 'Not your list'}), 403
+    db.session.delete(list_obj)
+    db.session.commit()
+    return jsonify({'message': 'list deleted'}), 200
 
 # get specific lists
 @lists.route('/<int:list_id>', methods=['GET'])
